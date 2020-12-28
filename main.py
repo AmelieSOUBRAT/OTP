@@ -34,6 +34,9 @@ def generate(dirname):
                 fichier = open(path + "/" +  fileNumber + "s", "a")
                 fichier.write(random(48))
                 fichier.close()
+    
+    createDirectory("receiver/" + dirname)
+    subprocess.call("cp -r "+path+"/ receiver/" + dirname +"/", shell=True)
 
 def random(size):
     listOfRandomNumber = ""
@@ -104,6 +107,9 @@ def sendText(text):
     print(len(text))
     for i in range(int(len(text)/8)):
         number = int(text[i*8:i*8+8], 2) + int(padC[i*8:i*8+8], 2)
+        print("1 : ", int(text[i*8:i*8+8], 2))
+        print("2 : ", int(padC[i*8:i*8+8], 2))
+        print("3 : ", number)
         textEncoded += '{0:09b}'.format(number)
     
     f = open(path + "/" + fileNumber + "p", "r")
@@ -123,7 +129,42 @@ def sendText(text):
     fichier.write(textInFileT)
     fichier.close()
     
+def receiveText(text):
+    prefix = text[:384]
+    suffix = text[-384:]
+    message = text[384:-384]
+    
+    path = "receiver/dir"
+    nbFile = subprocess.check_output("ls -1 receiver/dir | wc -l", shell=True)
 
+    for i in range(int(nbFile)):
+        directoryNumber = str(i)
+        while len(directoryNumber) < 4:
+            directoryNumber = "0" + directoryNumber
+        path += "/" + directoryNumber 
+        for j in range(100):
+            fileNumber = str(i)
+            while len(fileNumber) < 2:
+                fileNumber = "0" + fileNumber
+            if os.path.exists(path + "/" + fileNumber + "p") :
+                f = open(path + "/" + fileNumber + "p", "r")
+                padP = f.read()
+                f.close()
+                if padP == prefix:
+                    f = open(path + "/" + fileNumber + "c", "r")
+                    padC = f.read()
+                    f.close()
+                    textEncoded = ""
+                    for m in range(int(len(message)/9)):
+                        a = int(message[m*9:m*9+9], 2)
+                        b = int(padC[m*8:m*8+8], 2)
+                        c = a - b
+                        c = convertIntToBinary(c)
+                        number = int(message[m*9:m*9+9], 2) - int(padC[m*8:m*8+8], 2)
+                        textEncoded += chr(int(c, 2))
+                    print(textEncoded)
+                break         
+        break
 
 if __name__ == "__main__": 
     parser = argparse.ArgumentParser(description = "Write or read text in a PNG file")
@@ -153,6 +194,11 @@ if __name__ == "__main__":
         sendText(text)
     elif args.r:
         print("Receive")
+        textInFile = open(args.r, "r")
+        text = textInFile.read()
+        textInFile.close()
+        receiveText(text)
+
     elif args.g:
         dirname = args.g
         print ("Generate")
