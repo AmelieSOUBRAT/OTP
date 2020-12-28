@@ -77,17 +77,80 @@ def convertToAsciiBinary(text):
 def createDirectory(dirname):
     os.makedirs(dirname, exist_ok=True)
 
+def sendText(text):
+    path = "dir"
+    nbFile = subprocess.check_output("ls -1 dir | wc -l", shell=True)
+
+    for i in range(int(nbFile)):
+        directoryNumber = str(i)
+        while len(directoryNumber) < 4:
+            directoryNumber = "0" + directoryNumber
+        path += "/" + directoryNumber 
+        for j in range(100):
+            fileNumber = str(i)
+            while len(fileNumber) < 2:
+                fileNumber = "0" + fileNumber
+            if os.path.exists(path + "/" + fileNumber + "c") :
+                # path += "/" + fileNumber
+                print(fileNumber)
+                break
+        break
+
+    f = open(path + "/" + fileNumber + "c", "r")
+    padC = f.read()
+    f.close()
+
+    textEncoded = ""
+    print(len(text))
+    for i in range(int(len(text)/8)):
+        number = int(text[i*8:i*8+8], 2) + int(padC[i*8:i*8+8], 2)
+        textEncoded += '{0:09b}'.format(number)
+    
+    f = open(path + "/" + fileNumber + "p", "r")
+    padP = f.read()
+    f.close()
+
+    f = open(path + "/" + fileNumber + "s", "r")
+    padS = f.read()
+    f.close()
+
+
+    print(textEncoded)
+    textInFileT = padP + textEncoded + padS
+    print(len(textInFileT))
+    fichier = open("dir-"+directoryNumber+"-"+fileNumber+"t", "w")
+
+    fichier.write(textInFileT)
+    fichier.close()
+    
+
 
 if __name__ == "__main__": 
     parser = argparse.ArgumentParser(description = "Write or read text in a PNG file")
     parser.add_argument("-g", type = str, help = "text to write in the PNG")
     parser.add_argument("-s", type = str, help = "file to write in the PNG")
     parser.add_argument("-r", type = str, help = "file to write in the PNG")
+    parser.add_argument("-t", type = str, help = "text to write in the PNG")
+    parser.add_argument("-f", type = str, help = "file to write in the PNG")
     args = parser.parse_args()
 
 
     if args.s:
         print("Send")
+        if args.t:
+            text = args.t
+        elif args.f:
+            textInFile = open(args.f, "r")
+            text = textInFile.read()
+            textInFile.close()
+        else:
+            text = input("Enter your text : ")
+
+        text = convertToAsciiBinary(text) + "00000011"
+        if len(text) > 2000:
+            raise Exception('the length of the text is too big and not exceed 2000 bytes. The length was: {}'.format(len(text)))
+        print("halloS")
+        sendText(text)
     elif args.r:
         print("Receive")
     elif args.g:
