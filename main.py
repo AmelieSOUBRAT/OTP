@@ -225,7 +225,7 @@ def receiveText(dirname, text) :
         print("There is no pad corresponding")
 
 def main() :
-    parser = argparse.ArgumentParser(description = "Write or read text in a PNG file")
+    parser = argparse.ArgumentParser(description = "Write or read or generate directory to decode en encode text")
     parser.add_argument("directory", type = str, help = "name of directory")
     parser.add_argument("-g", help = "generate directory, must the name of this directory", action = "store_true")
     parser.add_argument("-s", help = "send mode, specify input folder to encode the text", action = "store_true")
