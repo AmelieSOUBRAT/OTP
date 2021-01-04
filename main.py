@@ -55,7 +55,7 @@ def generate(dirname):
     '''
 
     createDirectory(dirname)
-    nbOfFiles = subprocess.check_output("ls -1 "+dirname+" | wc -l", shell=True)
+    nbOfFiles = subprocess.check_output("ls -1 "+dirname+" | wc -l", shell = True)
     directoryNumber = addZeros(str(int(nbOfFiles)), 4)
     createDirectory(dirname + "/" + directoryNumber)
     if int(nbOfFiles) < 9999:
@@ -146,7 +146,7 @@ def createDirectory(dirname):
                     dirname (string): name of the directory that will be created
     '''
     
-    os.makedirs(dirname, exist_ok=True)
+    os.makedirs(dirname, exist_ok = True)
 
 def sendText(dirname, text):
     '''
@@ -157,10 +157,10 @@ def sendText(dirname, text):
                     text (string): the text that will be translated
     '''
 
-    nbFile = subprocess.check_output("ls -1 " + dirname + " | wc -l", shell=True)
+    nbFile = subprocess.check_output("ls -1 " + dirname + " | wc -l", shell = True)
     exist = False
     for i in range(int(nbFile)):
-        directoryNumber = addZeros(str(i),4)
+        directoryNumber = addZeros(str(i), 4)
         for j in range(100):
             fileNumber = addZeros(str(j), 2)
             path = dirname + "/" + directoryNumber + "/" + fileNumber
@@ -182,7 +182,7 @@ def sendText(dirname, text):
         textInFileT = padP + textEncoded + padS
     
         createFile(dirname+"-"+directoryNumber+"-"+fileNumber+"t", textInFileT)
-        subprocess.call("rm " + path + "c", shell=True)
+        subprocess.call("rm " + path + "c", shell = True)
     else:
         print("Please, choose an other directory, there is no more pad C")
 
@@ -199,9 +199,9 @@ def receiveText(dirname, text):
     decoded = False
     prefix = text[:384]
     message = text[384:-384]
-    nbFile = subprocess.check_output("ls -1 "+dirname+" | wc -l", shell=True)
+    nbFile = subprocess.check_output("ls -1 "+dirname+" | wc -l", shell = True)
     for i in range(int(nbFile)):
-        directoryNumber = addZeros(str(i),4)
+        directoryNumber = addZeros(str(i), 4)
         for j in range(100):
             fileNumber = addZeros(str(j), 2)
             path = dirname + "/" + directoryNumber + "/" + fileNumber
@@ -214,8 +214,8 @@ def receiveText(dirname, text):
                         number = int(message[m*9:m*9+9], 2) - int(padC[m*8:m*8+8], 2)
                         textEncoded += chr(number)
                     createFile(dirname+"-"+directoryNumber+"-"+fileNumber+"m", textEncoded[:-1])
-                    subprocess.call("rm " + path + "c", shell=True)
-                    subprocess.call("rm " + path + "p", shell=True)
+                    subprocess.call("rm " + path + "c", shell = True)
+                    subprocess.call("rm " + path + "p", shell = True)
                     decoded = True
                     break
         if decoded == True:         
@@ -225,9 +225,9 @@ def receiveText(dirname, text):
 
 if __name__ == "__main__": 
     parser = argparse.ArgumentParser(description = "Write or read text in a PNG file")
-    parser.add_argument("directory", type = str, help="name of directory")
+    parser.add_argument("directory", type = str, help = "name of directory")
     parser.add_argument("-g", help = "generate directory, must the name of this directory", action = "store_true")
-    parser.add_argument("-s", help = "send mode, specify input folder to encode the text", action="store_true")
+    parser.add_argument("-s", help = "send mode, specify input folder to encode the text", action = "store_true")
     parser.add_argument("-r", type = str, help = "read the encoded text, arguments : text to decode")
     parser.add_argument("-t", type = str, help = "text to encoded")
     parser.add_argument("-f", type = str, help = "file to encoded")
