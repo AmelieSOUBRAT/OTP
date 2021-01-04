@@ -251,7 +251,7 @@ def main() :
         #Add EOT
         text = convertToAsciiBinary(text) + "00000011"
 
-        if len(text) <= 2000 :
+        if len(text) <= 2000 * 8 :
             sendText(dirname, text)
         else :
             print("the length of the text is too big and it must not exceed 2000 bytes. The length was:" + str(len(text)))
