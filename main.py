@@ -1,8 +1,9 @@
 import argparse
 import subprocess
 import os
+import sys 
 
-def addZeros(pathName, size):
+def addZeros(pathName, size) :
     '''
     Add zeros to a filename or dirname
 
@@ -14,11 +15,11 @@ def addZeros(pathName, size):
                     pathName (string): the name of the file or directory in the good format
     '''
 
-    while len(pathName) < size:
+    while len(pathName) < size :
         pathName = "0" + pathName
     return pathName
 
-def createFile(path, content):
+def createFile(path, content) :
     '''
     Create file
 
@@ -31,7 +32,7 @@ def createFile(path, content):
     newFile.write(content)
     newFile.close()
 
-def readFile(path):
+def readFile(path) :
     '''
     read file
 
@@ -46,7 +47,7 @@ def readFile(path):
     file.close()
     return contentOfFile
 
-def generate(dirname):
+def generate(dirname) :
     '''
     Generate 100 pads in a subfolder of the directory specified in the position argument, the directory must contains less than 9999 directories 
 
@@ -55,28 +56,28 @@ def generate(dirname):
     '''
 
     createDirectory(dirname)
-    nbOfFiles = subprocess.check_output("ls -1 "+dirname+" | wc -l", shell = True)
+    nbOfFiles = subprocess.check_output("ls -1 " + dirname + " | wc -l", shell = True)
     directoryNumber = addZeros(str(int(nbOfFiles)), 4)
     createDirectory(dirname + "/" + directoryNumber)
-    if int(nbOfFiles) < 9999:
-        for i in range(100):
+    if int(nbOfFiles) < 9999 :
+        for i in range(100) :
             fileNumber = addZeros(str(i), 2)
             path = dirname + "/" + directoryNumber + "/" + fileNumber
-            for j in range(3):
-                if j == 0:
+            for j in range(3) :
+                if j == 0 :
                     createFile(path + "p", random(48))
-                elif j == 1:
+                elif j == 1 :
                     createFile(path + "c", random(2000))
-                else:
+                else :
                     createFile(path + "s", random(48))
 
         
-        createDirectory(dirname+"-receiver")
-        subprocess.call("cp -r "+ dirname + "/" + directoryNumber+ "/ " + dirname +"-receiver/", shell=True)
-    else:
+        createDirectory(dirname + "-receiver")
+        subprocess.call("cp -r "+ dirname + "/" + directoryNumber + "/ " + dirname + "-receiver/", shell=True)
+    else :
         print("Number of file in the directory " + dirname + " is too big: >= 9999")
 
-def random(size):
+def random(size) :
     '''
     Generate n random binary number 
 
@@ -87,12 +88,12 @@ def random(size):
     '''
 
     listOfRandomNumber = ""
-    with open("/dev/urandom", 'rb') as f:       
-        for i in range(size):
+    with open("/dev/urandom", 'rb') as f :       
+        for i in range(size) :
             listOfRandomNumber += convertIntToBinary8(int.from_bytes(f.read(1), 'big'))
     return listOfRandomNumber
 
-def convertIntToBinary8(number):
+def convertIntToBinary8(number) :
     '''
     Convert an integer in base 2
 
@@ -106,7 +107,7 @@ def convertIntToBinary8(number):
     binaryNumber = '{0:08b}'.format(number)
     return binaryNumber
 
-def convertIntToBinary9(number):
+def convertIntToBinary9(number) :
     '''
     Convert an integer in base 2
 
@@ -120,7 +121,7 @@ def convertIntToBinary9(number):
     binaryNumber = '{0:09b}'.format(number)
     return binaryNumber
 
-def convertToAsciiBinary(text):
+def convertToAsciiBinary(text) :
     '''
     Convert an acsii in base 2
 
@@ -132,13 +133,13 @@ def convertToAsciiBinary(text):
     '''
 
     binaryText = ""
-    for letter in text:
+    for letter in text :
         binaryLetter = convertIntToBinary8(ord(letter))
         binaryText += binaryLetter
     return binaryText
 
 
-def createDirectory(dirname):
+def createDirectory(dirname) :
     '''
     Create directory
 
@@ -148,7 +149,7 @@ def createDirectory(dirname):
     
     os.makedirs(dirname, exist_ok = True)
 
-def sendText(dirname, text):
+def sendText(dirname, text) :
     '''
     Encode th text and write it in the file "directory"-"directory2"-"file"t
 
@@ -159,35 +160,35 @@ def sendText(dirname, text):
 
     nbFile = subprocess.check_output("ls -1 " + dirname + " | wc -l", shell = True)
     exist = False
-    for i in range(int(nbFile)):
+    for i in range(int(nbFile)) :
         directoryNumber = addZeros(str(i), 4)
-        for j in range(100):
+        for j in range(100) :
             fileNumber = addZeros(str(j), 2)
             path = dirname + "/" + directoryNumber + "/" + fileNumber
             if os.path.exists(path + "c") :
                 exist = True
                 break
-        if exist == True:
+        if exist == True :
             break
     if exist == True :
         padC = readFile(path + "c")
 
         textEncoded = ""
-        for i in range(0, int(len(text)), 8):
-            number = int(text[i:i+8], 2) + int(padC[i:i+8], 2)
+        for i in range(0, int(len(text)), 8) :
+            number = int(text[i : i + 8], 2) + int(padC[i : i + 8], 2)
             textEncoded += convertIntToBinary9(number)
         
         padP = readFile(path + "p")
         padS = readFile(path + "s")
         textInFileT = padP + textEncoded + padS
     
-        createFile(dirname+"-"+directoryNumber+"-"+fileNumber+"t", textInFileT)
-        subprocess.call("rm " + path + "c", shell = True)
-    else:
+        createFile(dirname + "-" + directoryNumber + "-" + fileNumber + "t", textInFileT)
+        subprocess.call("shred --remove " + path + "c", shell = True)
+    else :
         print("Please, choose an other directory, there is no more pad C")
 
     
-def receiveText(dirname, text):
+def receiveText(dirname, text) :
     '''
     Decode th text and write it in the file "directory"-"directory2"-"file"m
 
@@ -197,33 +198,33 @@ def receiveText(dirname, text):
     '''
 
     decoded = False
-    prefix = text[:384]
-    message = text[384:-384]
-    nbFile = subprocess.check_output("ls -1 "+dirname+" | wc -l", shell = True)
-    for i in range(int(nbFile)):
+    prefix = text[ :  384]
+    message = text[384 : -384]
+    nbFile = subprocess.check_output("ls -1 " + dirname + " | wc -l", shell = True)
+    for i in range(int(nbFile)) :
         directoryNumber = addZeros(str(i), 4)
-        for j in range(100):
+        for j in range(100) :
             fileNumber = addZeros(str(j), 2)
             path = dirname + "/" + directoryNumber + "/" + fileNumber
             if os.path.exists(path + "p") :
                 padP = readFile(path + "p")
-                if padP == prefix:
+                if padP == prefix :
                     padC = readFile(path + "c")
                     textEncoded = ""
-                    for m in range(int(len(message)/9)):
-                        number = int(message[m*9:m*9+9], 2) - int(padC[m*8:m*8+8], 2)
+                    for m in range(int(len(message)/9)) :
+                        number = int(message[m * 9 : m * 9 + 9], 2) - int(padC[m * 8 : m * 8 + 8], 2)
                         textEncoded += chr(number)
-                    createFile(dirname+"-"+directoryNumber+"-"+fileNumber+"m", textEncoded[:-1])
-                    subprocess.call("rm " + path + "c", shell = True)
-                    subprocess.call("rm " + path + "p", shell = True)
+                    createFile(dirname + "-" + directoryNumber + "-" + fileNumber + "m", textEncoded[ : -1])
+                    subprocess.call("shred --remove " + path + "c", shell = True)
+                    subprocess.call("shred --remove " + path + "p", shell = True)
                     decoded = True
                     break
-        if decoded == True:         
+        if decoded == True :         
             break
-    if decoded == False:
+    if decoded == False :
         print("There is no pad corresponding")
 
-if __name__ == "__main__": 
+def main() :
     parser = argparse.ArgumentParser(description = "Write or read text in a PNG file")
     parser.add_argument("directory", type = str, help = "name of directory")
     parser.add_argument("-g", help = "generate directory, must the name of this directory", action = "store_true")
@@ -234,33 +235,38 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     response = os.system("ping -c 1 google.com")
-    if response == 0:
-        print ("Internet connected")
-    else:
-        print ("Internet not connected")
+    if response == 0 :
+        print("Internet is connected, you can't use this program")
+        return 0
 
     dirname = args.directory
-    if args.s:
+    if args.s :
         print("Send")
-        if args.t:
+        if args.t :
             text = args.t
-        elif args.f:
+        elif args.f :
             text = readFile(args.f)
-        else:
+        else :
             text = input("Enter your text : ")
         #Add EOT
         text = convertToAsciiBinary(text) + "00000011"
 
-        if len(text) <= 2000:
+        if len(text) <= 2000 :
             sendText(dirname, text)
-        else:
-            print("the length of the text is too big and it must not exceed 2000 bytes. The length was:"+len(text))
+        else :
+            print("the length of the text is too big and it must not exceed 2000 bytes. The length was:" + str(len(text)))
+            return 0    
 
-    elif args.r:
+
+    elif args.r :
         print("Receive")
         text = readFile(args.r)
         receiveText(dirname, text)
 
-    else:
+    else :
         print ("Generate")
         generate(dirname)
+
+
+if __name__ == "__main__" :
+    main() 
