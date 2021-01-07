@@ -227,9 +227,10 @@ def receiveText(dirname, text) :
 def main() :
     parser = argparse.ArgumentParser(description = "Write or read or generate directory to decode en encode text")
     parser.add_argument("directory", type = str, help = "name of directory")
+    parser.add_argument("filename", nargs="?", type = str, help = "name of directory")
     parser.add_argument("-g", help = "generate directory, must the name of this directory", action = "store_true")
     parser.add_argument("-s", help = "send mode, specify input folder to encode the text", action = "store_true")
-    parser.add_argument("-r", type = str, help = "read the encoded text, arguments : text to decode")
+    parser.add_argument("-r", help = "read the encoded text",  action = "store_true")
     parser.add_argument("-t", type = str, help = "text to encoded")
     parser.add_argument("-f", type = str, help = "file to encoded")
     args = parser.parse_args()
@@ -260,7 +261,8 @@ def main() :
 
     elif args.r :
         print("Receive")
-        text = readFile(args.r)
+        filename = args.filename
+        text = readFile(filename)
         receiveText(dirname, text)
 
     else :
